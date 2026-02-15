@@ -1,0 +1,51 @@
+# ==============================
+# Java compiled files
+# ==============================
+*.class
+
+# Logs
+*.log
+
+# Build directories (Maven / Gradle / IntelliJ)
+target/
+build/
+out/
+
+# ==============================
+# IDE files
+# ==============================
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# ==============================
+# OS files
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Environment files
+# ==============================
+.env
+
+# ==============================
+# Node (only if you add npm later)
+# ==============================
+node_modules/
+package-lock.json
+
+# ==============================
+# Temporary files
+# ==============================
+*.tmp
+*.swp
