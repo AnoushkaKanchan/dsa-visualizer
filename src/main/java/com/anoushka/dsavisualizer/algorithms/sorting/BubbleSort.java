@@ -1,11 +1,10 @@
 package com.anoushka.dsavisualizer.algorithms.sorting;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.anoushka.dsavisualizer.algorithms.Algorithm;
 import com.anoushka.dsavisualizer.models.ActionType;
 import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.models.Step;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BubbleSort implements Algorithm {
     public AlgorithmResult execute(int[] input){
