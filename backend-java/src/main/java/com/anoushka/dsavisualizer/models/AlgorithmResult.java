@@ -1,14 +1,15 @@
+package com.anoushka.dsavisualizer.models;
 import java.util.List;
 
-class AlgorithmResult{
+public class AlgorithmResult{
     private List<Step> steps;
     private int comparisonCount;
     private int swapCount;
     private int[] finalArray;
     private Integer foundIndex;
 
-    public AlgorithmResult(List<Step> steps,int comparisonCount,int swapCount,int[] finalArray,Integer foundIndex){
-       this.steps=steps;
+    public AlgorithmResult(List<Step> steps2,int comparisonCount,int swapCount,int[] finalArray,Integer foundIndex){
+       this.steps=steps2;
        this.comparisonCount=comparisonCount;
        this.swapCount=swapCount;
        this.finalArray=finalArray.clone();

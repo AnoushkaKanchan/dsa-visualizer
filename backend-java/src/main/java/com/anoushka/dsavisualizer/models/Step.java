@@ -1,3 +1,4 @@
+package com.anoushka.dsavisualizer.models;
 public class Step{
 
     private int[] array;
