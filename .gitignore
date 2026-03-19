@@ -8,6 +8,11 @@
 
 # Build directories (Maven / Gradle / IntelliJ)
 target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
 build/
 out/
 
