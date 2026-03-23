@@ -3,18 +3,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.stereotype.Component;
+
 import com.anoushka.dsavisualizer.algorithms.Algorithm;
 import com.anoushka.dsavisualizer.models.ActionType;
 import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.models.Step;
 
+@Component("quick")
 public class QuickSort implements Algorithm {
     private int comparisonCount;
     private int swapCount;
     private List<Step> steps;
     private final Random rand = new Random();
 
-    public AlgorithmResult execute (int[] input){
+    public AlgorithmResult execute (int[] input, Integer target){
 
         int[] arr=input.clone();
         comparisonCount=0;

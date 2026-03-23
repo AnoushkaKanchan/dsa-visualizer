@@ -3,13 +3,16 @@ package com.anoushka.dsavisualizer.algorithms.sorting;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.anoushka.dsavisualizer.algorithms.Algorithm;
 import com.anoushka.dsavisualizer.models.ActionType;
 import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.models.Step;
 
+@Component("selection")
 public class SelectionSort implements Algorithm{
-    public AlgorithmResult execute (int[] input){
+    public AlgorithmResult execute (int[] input, Integer target){
 
         int comparisonCount=0;
         int swapCount=0;
