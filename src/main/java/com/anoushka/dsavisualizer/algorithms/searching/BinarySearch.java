@@ -8,11 +8,7 @@ import com.anoushka.dsavisualizer.models.AlgorithmResult;
 
 @Component("binary")
 public class BinarySearch implements Algorithm {
-    private final int target;
-
-    public BinarySearch(int target) {
-        this.target=target;
-    }
+    
     @Override
     public AlgorithmResult execute(AlgorithmRequest request) {
         return null;

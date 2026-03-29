@@ -17,7 +17,7 @@ public class AlgorithmService {
     public AlgorithmResult run(AlgorithmRequest request){
 
         Algorithm algorithm=(Algorithm) context.getBean(request.getAlgorithm());
-        System.out.println("Algorithm selected: " + algorithm);
+        System.out.println("Algorithm selected: " + algorithm.getClass().getSimpleName());
 
         AlgorithmResult result=algorithm.execute(request);
 

@@ -20,7 +20,11 @@ public class LinearSearch implements Algorithm {
         int comparisonCount=0;
         List<Step> steps=new ArrayList<>();
         int [] arr=request.getArray().clone();
-        int target=request.getTarget();
+        int target = request.getTarget();
+
+        if (request.getTarget() == null) {
+            throw new RuntimeException("Target is required for searching");
+        }
 
         for(int i=0;i<arr.length;i++){
 
