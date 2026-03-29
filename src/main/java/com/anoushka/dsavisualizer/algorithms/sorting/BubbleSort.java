@@ -6,15 +6,18 @@ import org.springframework.stereotype.Component;
 
 import com.anoushka.dsavisualizer.algorithms.Algorithm;
 import com.anoushka.dsavisualizer.models.ActionType;
+import com.anoushka.dsavisualizer.models.AlgorithmRequest;
 import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.models.Step;
 
 @Component("bubble")
 public class BubbleSort implements Algorithm {
-    public AlgorithmResult execute(int[] input, Integer target){
+    
+    @Override
+    public AlgorithmResult execute(AlgorithmRequest request){
         int comparisonCount=0;
         int swapCount=0;
-        int []arr=input.clone();
+        int []arr=request.getArray().clone();
         List<Step> steps = new ArrayList<>();
 
         for (int i = 0; i < arr.length - 1; i++) {

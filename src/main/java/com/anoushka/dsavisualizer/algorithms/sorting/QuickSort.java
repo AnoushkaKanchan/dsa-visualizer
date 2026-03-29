@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.anoushka.dsavisualizer.algorithms.Algorithm;
 import com.anoushka.dsavisualizer.models.ActionType;
+import com.anoushka.dsavisualizer.models.AlgorithmRequest;
 import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.models.Step;
 
@@ -17,9 +18,10 @@ public class QuickSort implements Algorithm {
     private List<Step> steps;
     private final Random rand = new Random();
 
-    public AlgorithmResult execute (int[] input, Integer target){
+    @Override
+    public AlgorithmResult execute (AlgorithmRequest request){
 
-        int[] arr=input.clone();
+        int[] arr=request.getArray().clone();
         comparisonCount=0;
         swapCount=0;
         steps = new ArrayList<>();

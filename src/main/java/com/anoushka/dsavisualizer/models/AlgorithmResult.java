@@ -2,11 +2,11 @@ package com.anoushka.dsavisualizer.models;
 import java.util.List;
 
 public class AlgorithmResult{
-    private List<Step> steps;
-    private int comparisonCount;
-    private int swapCount;
-    private int[] finalArray;
-    private Integer foundIndex;
+    private final List<Step> steps;
+    private final int comparisonCount;
+    private final int swapCount;
+    private final int[] finalArray;
+    private final Integer foundIndex;
 
     public AlgorithmResult(List<Step> steps2,int comparisonCount,int swapCount,int[] finalArray,Integer foundIndex){
        this.steps=steps2;

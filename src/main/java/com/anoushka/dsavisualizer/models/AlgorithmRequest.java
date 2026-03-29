@@ -1,17 +1,9 @@
 package com.anoushka.dsavisualizer.models;
 
-public  class DSARequest{
-    private String type;
+public  class AlgorithmRequest{
     private int[] array;
     private Integer target;
     private String algorithm;
-
-    public String getType() {
-        return type;
-    }
-    public void setType(String type) {
-        this.type = type;
-    }
     
     public String getAlgorithm() {
         return algorithm;
@@ -34,6 +26,5 @@ public  class DSARequest{
         this.target = target;
     }
        
-
 }
 

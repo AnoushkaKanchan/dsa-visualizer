@@ -1,10 +1,10 @@
 package com.anoushka.dsavisualizer.models;
 public class Step{
 
-    private int[] array;
-    private int index1;
-    private int index2;
-    private ActionType actionType;
+    private final int[] array;
+    private final int index1;
+    private final int index2;
+    private final ActionType actionType;
 
     public Step(int[] array, int index1 ,int index2, ActionType actionType){
         this.array=array.clone();
