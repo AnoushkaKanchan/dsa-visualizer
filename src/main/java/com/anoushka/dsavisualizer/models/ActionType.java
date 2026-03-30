@@ -7,5 +7,5 @@ public enum ActionType{
   FOUND,
   NOT_FOUND,
   PIVOT_FINAL,
-  PIVOT;
+  PIVOT, RIGHT, LEFT;
 }
