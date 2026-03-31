@@ -38,47 +38,58 @@ public class MergeSort implements Algorithm {
 
     // MERGE FUNCTION - THE CORE LOGIC
     private void merge(int[] arr, int start, int middle, int end) {
+        
+            try {
+                int[] temp=new int[(end - start + 1)];
+                int leftPointer = start;            //(points to left subarray)
+                int rightPointer = middle + 1;      // (points to right subarray)
+                int tempIndex = 0;                // (for temp array)
 
-        int[] temp=new int[(end - start + 1)];
-        int leftPointer = start;            //(points to left subarray)
-        int rightPointer = middle + 1;      // (points to right subarray)
-        int tempIndex = 0;                // (for temp array)
+                while (leftPointer <= middle && rightPointer <= end){
 
-        while (leftPointer <= middle && rightPointer <= end){
+                    comparisonCount++;
+                    if (leftPointer <= end && rightPointer <= end) {
+                        steps.add(new Step(arr.clone(), leftPointer, rightPointer, ActionType.COMPARE));
+                    }       
 
-            comparisonCount++;
-            steps.add(new Step(arr.clone(), leftPointer, rightPointer, ActionType.COMPARE));
+                    if (arr[leftPointer] <= arr[rightPointer]) {
+                        temp[tempIndex] = arr[leftPointer];
+                        leftPointer++;
+                        tempIndex++;
 
-            if (arr[leftPointer] <= arr[rightPointer]) {
-                temp[tempIndex] = arr[leftPointer];
-                leftPointer++;
-                tempIndex++;
+                    }
+                    else{
+                        temp[tempIndex] = arr[rightPointer];
+                        rightPointer++;
+                        tempIndex++;
 
+                    }
+                }
+                // Step 2: Copy remaining LEFT
+                while (leftPointer <= middle){
+                    temp[tempIndex] = arr[leftPointer];
+                    leftPointer++;
+                    tempIndex++;
+                }  
+                // Step 3: Copy remaining RIGHT
+                while (rightPointer <= end){
+                    temp[tempIndex] = arr[rightPointer];
+                    rightPointer++;
+                    tempIndex++;
+                }
+                // Step 4: Copy sorted result back
+                for (int i = 0; i < temp.length; i++){
+                    arr[start + i] = temp[i];
+                    if (start + i < arr.length) {
+                        steps.add(new Step(arr.clone(), start + i, -1, ActionType.OVERWRITE));
+                    }
+                }
+    
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-             else{
-                temp[tempIndex] = arr[rightPointer];
-                rightPointer++;
-                tempIndex++;
 
-            }
-        }
-         // Step 2: Copy remaining LEFT
-        while (leftPointer <= middle){
-            temp[tempIndex] = arr[leftPointer];
-            leftPointer++;
-            tempIndex++;
-        }  
-        // Step 3: Copy remaining RIGHT
-        while (rightPointer <= end){
-            temp[tempIndex] = arr[rightPointer];
-            rightPointer++;
-            tempIndex++;
-        }
-        // Step 4: Copy sorted result back
-        for (int i = 0; i < temp.length; i++){
-            arr[start + i] = temp[i];
-            steps.add(new Step(arr.clone(), start + i, -1, ActionType.OVERWRITE));
-        }
+        
 
     }
 
