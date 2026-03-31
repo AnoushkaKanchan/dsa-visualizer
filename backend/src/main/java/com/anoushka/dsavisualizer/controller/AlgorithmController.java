@@ -20,13 +20,19 @@ public class AlgorithmController {
     private AlgorithmService algorithmService;
 
     @PostMapping("/run")
-    public AlgorithmResult run(@RequestBody AlgorithmRequest request){
-        
-        if (request.getAlgorithm() == null || request.getArray() == null) {
-            throw new RuntimeException("Invalid request");
-        }
-        
+public AlgorithmResult run(@RequestBody AlgorithmRequest request) {
+
+    try {
+        System.out.println("🔥 Algorithm: " + request.getAlgorithm());
+        System.out.println("🔥 Array: " + java.util.Arrays.toString(request.getArray()));
+
         return algorithmService.run(request);
+
+    } catch (Exception e) {
+        e.printStackTrace(); // 🔥 THIS LINE IS THE MOST IMPORTANT
+        throw new RuntimeException("Internal error: " + e.getMessage());
+    }
+}
     }
     
-}
+
