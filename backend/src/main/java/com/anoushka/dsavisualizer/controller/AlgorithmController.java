@@ -25,11 +25,6 @@ public class AlgorithmController {
         if (request.getAlgorithm() == null || request.getArray() == null) {
             throw new RuntimeException("Invalid request");
         }
-
-        catch (Exception e) {
-    e.printStackTrace();
-    throw e;
-}
         
         return algorithmService.run(request);
     }
