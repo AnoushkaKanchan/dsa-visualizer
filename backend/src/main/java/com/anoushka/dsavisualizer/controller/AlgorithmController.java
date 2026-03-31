@@ -11,7 +11,7 @@ import com.anoushka.dsavisualizer.models.AlgorithmRequest;
 import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.services.AlgorithmService;
 
-@CrossOrigin(origins = "https://dsa-visualizer-omega-five.vercel.app/")
+@CrossOrigin(origins = "https://dsa-visualizer-omega-five.vercel.app")
 @RestController
 @RequestMapping("/api")
 public class AlgorithmController {
