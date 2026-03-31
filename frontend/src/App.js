@@ -61,7 +61,8 @@ function App() {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.text();
+console.log("BACKEND RESPONSE:", data);
       setSteps(data.steps);
       setCurrentStepIndex(-1);
 
