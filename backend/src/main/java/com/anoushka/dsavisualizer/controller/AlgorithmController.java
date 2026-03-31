@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.anoushka.dsavisualizer.models.AlgorithmRequest;
+import com.anoushka.dsavisualizer.models.AlgorithmResult;
 import com.anoushka.dsavisualizer.services.AlgorithmService;
 
 @CrossOrigin(origins = "https://dsa-visualizer-omega-five.vercel.app/")
@@ -19,21 +20,13 @@ public class AlgorithmController {
     private AlgorithmService algorithmService;
 
     @PostMapping("/run")
-public Object run(@RequestBody AlgorithmRequest request) {
-
-    try {
-        System.out.println("🔥 Algorithm: " + request.getAlgorithm());
-        System.out.println("🔥 Array: " + java.util.Arrays.toString(request.getArray()));
-
+    public AlgorithmResult run(@RequestBody AlgorithmRequest request){
+        
+        if (request.getAlgorithm() == null || request.getArray() == null) {
+            throw new RuntimeException("Invalid request");
+        }
+        
         return algorithmService.run(request);
-
-    } catch (Exception e) {
-        e.printStackTrace();
-
-        // 🔥 RETURN ERROR TO FRONTEND
-        return "ERROR: " + e.toString();
-    }
-}
     }
     
-
+}
