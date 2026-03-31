@@ -47,6 +47,7 @@ function App() {
   // ── RUN ALGORITHM ──
   const start = async () => {
     setIsRunning(true);
+    setIsPaused(false);
     pauseRef.current = false;
 
     try {
@@ -62,6 +63,7 @@ function App() {
 
       const data = await response.json();
       setSteps(data.steps);
+      setCurrentStepIndex(-1);
 
       for (let i = 0; i < data.steps.length; i++) {
         while (pauseRef.current) {
@@ -71,95 +73,169 @@ function App() {
         await sleep(speed);
       }
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Error fetching algorithm steps:", err);
     }
 
     setIsRunning(false);
   };
 
-  const pause = () => { pauseRef.current = true; setIsPaused(true); };
+  const pause  = () => { pauseRef.current = true;  setIsPaused(true);  };
   const resume = () => { pauseRef.current = false; setIsPaused(false); };
+
   const stepForward = () => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex((prev) => prev + 1);
     }
   };
+
   const reset = () => {
-    setSteps([]); setCurrentStepIndex(-1);
-    setIsRunning(false); setIsPaused(false);
+    setSteps([]);
+    setCurrentStepIndex(-1);
+    setIsRunning(false);
+    setIsPaused(false);
     pauseRef.current = false;
+  };
+
+  // ── MERGE RANGE HIGHLIGHT HELPER ──
+  // For Merge Sort, index1 = range start, index2 = range end
+  // We highlight the whole range instead of just two bars
+  const isMergeRangeStep = (step) => {
+    if (!step) return false;
+    return (
+      algorithm === "merge" &&
+      (step.actionType === "OVERWRITE" || step.actionType === "COMPARE") &&
+      step.index2 > step.index1  // range step, not a single-element compare
+    );
   };
 
   // ── COLOR LOGIC ──
   const getColor = (index) => {
     if (!currentStep) return "var(--bar-default)";
-    if (index === currentStep.index1 || index === currentStep.index2) {
-      switch (currentStep.actionType) {
-        case "COMPARE":  return "var(--yellow)";
-        case "SWAP":     return "var(--red)";
-        case "OVERWRITE":return "var(--blue)";
-        case "FOUND":    return "var(--green)";
-        case "CHECK":    return "var(--orange)";
-        default:         return "purple";
+
+    const { index1, index2, actionType } = currentStep;
+
+    // FIX: For merge range steps, highlight entire range between index1 and index2
+    if (isMergeRangeStep(currentStep)) {
+      if (index >= index1 && index <= index2) {
+        return actionType === "OVERWRITE" ? "var(--blue)" : "var(--yellow)";
+      }
+      return "var(--bar-default)";
+    }
+
+    // FIX: Guard against index2 = -1 (no second pointer)
+    const isActive =
+      index === index1 || (index2 !== -1 && index === index2);
+
+    if (isActive) {
+      switch (actionType) {
+        case "COMPARE":   return "var(--yellow)";
+        case "SWAP":      return "var(--red)";
+        case "OVERWRITE": return "var(--blue)";
+        case "FOUND":     return "var(--green)";
+        case "CHECK":     return "var(--orange)";
+        default:          return "purple";
       }
     }
+
     return "var(--bar-default)";
   };
 
   const getBarClass = (index) => {
     if (!currentStep) return "bar";
-    if (index === currentStep.index1 || index === currentStep.index2) {
-      return `bar ${currentStep.actionType}`;
+    const { index1, index2, actionType } = currentStep;
+
+    if (isMergeRangeStep(currentStep)) {
+      if (index >= index1 && index <= index2) {
+        return `bar ${actionType}`;
+      }
+      return "bar";
     }
-    return "bar";
+
+    const isActive =
+      index === index1 || (index2 !== -1 && index === index2);
+
+    return isActive ? `bar ${actionType}` : "bar";
   };
 
   // ── HUMAN READABLE EXPLANATION ──
   const getStepExplanation = () => {
     if (!currentStep) return null;
-    const a = currentStep.array;
-    const i1 = currentStep.index1;
-    const i2 = currentStep.index2;
-    const v1 = a?.[i1];
-    const v2 = a?.[i2];
 
-    switch (currentStep.actionType) {
+    const { array: a, index1: i1, index2: i2, actionType } = currentStep;
+    const v1 = a?.[i1];
+    const v2 = i2 !== -1 ? a?.[i2] : undefined;
+
+    // FIX: Special explanation for merge range steps
+    if (isMergeRangeStep(currentStep)) {
+      return actionType === "OVERWRITE"
+        ? {
+            emoji: "✏️",
+            title: "Placing",
+            detail: `Writing sorted values back into positions ${i1}–${i2} after merging`,
+          }
+        : {
+            emoji: "👀",
+            title: "Merging",
+            detail: `Merging subarray from position ${i1} to ${i2} — comparing and combining sorted halves`,
+          };
+    }
+
+    switch (actionType) {
       case "COMPARE":
         return {
           emoji: "👀",
           title: "Comparing",
-          detail: v2 !== undefined && i1 !== i2
-            ? `Comparing ${v1} (pos ${i1}) and ${v2} (pos ${i2}) — ${v1 > v2 ? `${v1} > ${v2}, a swap is needed` : v1 < v2 ? `${v1} < ${v2}, already in order` : `they are equal, no swap needed`}`
-            : `Checking element ${v1} at position ${i1}`,
+          detail:
+            v2 !== undefined && i1 !== i2
+              ? `Comparing ${v1} (pos ${i1}) and ${v2} (pos ${i2}) — ${
+                  v1 > v2
+                    ? `${v1} > ${v2}, a swap is needed`
+                    : v1 < v2
+                    ? `${v1} < ${v2}, already in order`
+                    : `they are equal, no swap needed`
+                }`
+              : `Checking element ${v1} at position ${i1}`,
         };
+
       case "SWAP":
         return {
           emoji: "🔄",
           title: "Swapping",
           detail: `Swapping ${v1} and ${v2} — placing the larger value to the right`,
         };
+
       case "OVERWRITE":
         return {
           emoji: "✏️",
           title: "Placing",
           detail: `Writing ${v1} into position ${i1} — merging sorted halves`,
         };
+
       case "FOUND":
         return {
           emoji: "✅",
           title: "Found!",
           detail: `Target found at position ${i1} — the value ${v1} matches what we were looking for`,
         };
+
       case "CHECK":
         return {
           emoji: "🔍",
           title: "Checking",
-          detail: i2 !== undefined && i1 !== i2
-            ? `Checking middle element ${v1} at position ${i1} against target — ${v1 > Number(target) ? "target is smaller, search left half" : v1 < Number(target) ? "target is larger, search right half" : "match!"}`
-            : `Checking element ${v1} at position ${i1}`,
+          detail:
+            v2 !== undefined && i1 !== i2
+              ? `Checking middle element ${v1} at position ${i1} against target — ${
+                  v1 > Number(target)
+                    ? "target is smaller, search left half"
+                    : v1 < Number(target)
+                    ? "target is larger, search right half"
+                    : "match!"
+                }`
+              : `Checking element ${v1} at position ${i1}`,
         };
+
       default:
-        return { emoji: "⚙️", title: currentStep.actionType, detail: "" };
+        return { emoji: "⚙️", title: actionType, detail: "" };
     }
   };
 
@@ -219,9 +295,7 @@ function App() {
 
         {/* TOP BAR */}
         <div className="card-topbar">
-          <div className="topbar-dots">
-            <span /><span /><span />
-          </div>
+          <div className="topbar-dots"><span /><span /><span /></div>
           <span className="topbar-label">visualizer.exe</span>
           <span className="topbar-algo-tag">{algoLabels[algorithm]}</span>
         </div>
@@ -229,23 +303,27 @@ function App() {
         {/* VISUALIZER */}
         <div className="visualizer-wrapper">
 
-          {/* ── BAR CHART with pointers ── */}
+          {/* BAR CHART with pointers */}
           <div className="bars-section">
-            {/* pointer row — arrows above active bars */}
             <div className="pointer-row">
               {displayArray.map((_, index) => {
-                const isI1 = currentStep && index === currentStep.index1;
-                const isI2 = currentStep && index === currentStep.index2 && currentStep.index2 !== currentStep.index1;
+                const { index1, index2, actionType } = currentStep || {};
+
+                // FIX: Don't show i/j pointers for merge range steps
+                const isMerge = currentStep && isMergeRangeStep(currentStep);
+                const isI1 = !isMerge && currentStep && index === index1;
+                const isI2 = !isMerge && currentStep && index2 !== -1 && index === index2 && index2 !== index1;
+
                 return (
                   <div key={index} className="pointer-cell" style={{ width: "30px" }}>
                     {isI1 && (
-                      <div className={`pointer pointer-i1 ${currentStep.actionType}`}>
+                      <div className={`pointer pointer-i1 ${actionType}`}>
                         <span className="pointer-label">i</span>
                         <span className="pointer-arrow">▼</span>
                       </div>
                     )}
                     {isI2 && (
-                      <div className={`pointer pointer-i2 ${currentStep.actionType}`}>
+                      <div className={`pointer pointer-i2 ${actionType}`}>
                         <span className="pointer-label">j</span>
                         <span className="pointer-arrow">▼</span>
                       </div>
@@ -272,19 +350,34 @@ function App() {
             <div className="axis-line" />
           </div>
 
-          {/* ── ARRAY BOXES ── */}
+          {/* ARRAY BOXES */}
           <div className="array-boxes-section">
             <div className="array-boxes-label">array</div>
             <div className="array-boxes">
               {displayArray.map((value, index) => {
-                const isI1 = currentStep && index === currentStep.index1;
-                const isI2 = currentStep && index === currentStep.index2 && currentStep.index2 !== currentStep.index1;
-                const isActive = isI1 || isI2;
+                const isMerge = currentStep && isMergeRangeStep(currentStep);
+                const { index1, index2, actionType } = currentStep || {};
+
+                // FIX: For merge range, highlight the whole range in boxes too
+                const isInMergeRange =
+                  isMerge && index >= index1 && index <= index2;
+                const isI1 = !isMerge && currentStep && index === index1;
+                const isI2 =
+                  !isMerge &&
+                  currentStep &&
+                  index2 !== -1 &&
+                  index === index2 &&
+                  index2 !== index1;
+                const isActive = isI1 || isI2 || isInMergeRange;
+
                 return (
                   <div key={index} className="array-box-wrap">
                     <div
-                      className={`array-box ${isActive ? "active " + currentStep.actionType : ""}`}
-                      style={{ borderColor: isActive ? getColor(index) : undefined, color: isActive ? getColor(index) : undefined }}
+                      className={`array-box ${isActive ? "active " + (currentStep?.actionType || "") : ""}`}
+                      style={{
+                        borderColor: isActive ? getColor(index) : undefined,
+                        color: isActive ? getColor(index) : undefined,
+                      }}
                     >
                       {value}
                     </div>
@@ -317,7 +410,6 @@ function App() {
                   <div className="explanation-detail">{explanation.detail}</div>
                 </div>
               </div>
-              {/* mini progress bar */}
               <div className="explanation-progress">
                 <div
                   className="explanation-progress-fill"
@@ -335,8 +427,6 @@ function App() {
 
         {/* CONTROLS */}
         <div className="controls">
-
-          {/* Row 1: Algorithm + Array + Target */}
           <div className="controls-row">
             <span className="controls-label">Algo</span>
             <select onChange={(e) => setAlgorithm(e.target.value)} value={algorithm}>
@@ -375,7 +465,6 @@ function App() {
             )}
           </div>
 
-          {/* Row 2: Speed */}
           <div className="controls-row">
             <span className="controls-label">Speed</span>
             <div className="speed-row">
@@ -390,7 +479,6 @@ function App() {
             </div>
           </div>
 
-          {/* Row 3: Action Buttons */}
           <div className="controls-row">
             <span className="controls-label">Actions</span>
             <div className="btn-group">
@@ -420,12 +508,12 @@ function App() {
         {/* LEGEND */}
         <div className="legend">
           {[
-            { color: "var(--yellow)", label: "Compare" },
-            { color: "var(--red)",    label: "Swap" },
-            { color: "var(--blue)",   label: "Overwrite" },
-            { color: "var(--green)",  label: "Found" },
-            { color: "var(--orange)", label: "Check" },
-            { color: "var(--bar-default)", label: "Default" },
+            { color: "var(--yellow)",      label: "Compare"   },
+            { color: "var(--red)",         label: "Swap"      },
+            { color: "var(--blue)",        label: "Overwrite" },
+            { color: "var(--green)",       label: "Found"     },
+            { color: "var(--orange)",      label: "Check"     },
+            { color: "var(--bar-default)", label: "Default"   },
           ].map(({ color, label }) => (
             <div key={label} className="legend-item">
               <div className="legend-dot" style={{ background: color }} />
@@ -433,6 +521,7 @@ function App() {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );
