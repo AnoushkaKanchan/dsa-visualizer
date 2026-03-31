@@ -47,7 +47,7 @@ public class MergeSort implements Algorithm {
         while (leftPointer <= middle && rightPointer <= end){
 
             comparisonCount++;
-            steps.add(new Step(arr, leftPointer, rightPointer, ActionType.COMPARE));
+            steps.add(new Step(arr.clone(), leftPointer, rightPointer, ActionType.COMPARE));
 
             if (arr[leftPointer] <= arr[rightPointer]) {
                 temp[tempIndex] = arr[leftPointer];
@@ -77,7 +77,7 @@ public class MergeSort implements Algorithm {
         // Step 4: Copy sorted result back
         for (int i = 0; i < temp.length; i++){
             arr[start + i] = temp[i];
-            steps.add(new Step(arr, start + i, -1, ActionType.OVERWRITE));
+            steps.add(new Step(arr.clone(), start + i, -1, ActionType.OVERWRITE));
         }
 
     }
