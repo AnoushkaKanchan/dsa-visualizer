@@ -356,7 +356,7 @@ function App() {
             <div className="array-boxes">
               {displayArray.map((value, index) => {
                 const isMerge = currentStep && isMergeRangeStep(currentStep);
-                const { index1, index2, actionType } = currentStep || {};
+                const { index1, index2 } = currentStep || {};
 
                 // FIX: For merge range, highlight the whole range in boxes too
                 const isInMergeRange =
