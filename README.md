@@ -38,15 +38,15 @@
 Each algorithm implements a shared `execute()` contract via an interface — enabling plug-and-play extensibility. A dynamic dispatcher at `POST /api/run` routes requests to the correct implementation at runtime.
 
 ```java
-public interface SortingAlgorithm {
-    ExecutionResult execute(int[] input);
-}
+    public interface Algorithm {
+        AlgorithmResult execute(AlgorithmRequest request);
+    }
 ```
 
 Per-tick execution state includes:
 - **Array snapshot** — the full array at each step
 - **Index pointers** — which elements are being operated on
-- **Action type** — `COMPARE`, `SWAP`, or `FOUND`
+- **Action type** — `COMPARE`, `SWAP`, `FOUND`, `OVERWRITE`, `CHECK`, `NOT_FOUND`, `PIVOT`, `RIGHT`, or `LEFT`;
 
 ### API Contract
 
@@ -54,8 +54,9 @@ Per-tick execution state includes:
 ```json
 POST /api/run
 {
-  "algorithm": "bubbleSort",
-  "input": [5, 2, 8, 1, 9]
+  "type": "sorting",
+  "algorithm": "quick",
+  "array": [5,3,8,1]
 }
 ```
 
@@ -63,11 +64,14 @@ POST /api/run
 ```json
 {
   "steps": [
-    { "array": [5, 2, 8, 1, 9], "action": "COMPARE", "indices": [0, 1] },
-    { "array": [2, 5, 8, 1, 9], "action": "SWAP",    "indices": [0, 1] }
+    { "array": [5, 3, 8, 1], "index1": 3, "index2": 3, "actionType": "PIVOT" },
+    { "array": [5, 3, 8, 1], "index1": 0, "index2": 3, "actionType": "COMPARE" },
+    { "array": [1, 3, 8, 5], "index1": 0, "index2": 3, "actionType": "SWAP" }
   ],
-  "comparisons": 10,
-  "swaps": 4
+  "comparisonCount": 5,
+  "swapCount": 3,
+  "finalArray": [1, 3, 5, 8],
+  "foundIndex": null
 }
 ```
 
@@ -90,7 +94,6 @@ POST /api/run
 
 ### Prerequisites
 
-- Node.js 18+
 - Java 17+
 - Maven
 
@@ -104,11 +107,10 @@ cd dsa-visualizer/frontend
 # Install dependencies
 npm install
 
-# Set environment variable
-echo "REACT_APP_API_URL=http://localhost:8080" > .env
-
-# Start dev server
+# Run the app
 npm start
+
+👉 The frontend runs on: http://localhost:3000
 ```
 
 ### Backend (Spring Boot)
@@ -116,13 +118,33 @@ npm start
 ```bash
 cd dsa-visualizer/backend
 
-# Run with Maven
-./mvnw spring-boot:run
+# Run backend
+mvn spring-boot:run
+
+👉 Backend runs on: http://localhost:8080
 ```
 
-The backend will start at `http://localhost:8080`.
+##  Environment Configuration
 
-### Docker (optional)
+Create a `.env` file inside the `frontend/` directory:
+
+```env
+REACT_APP_API_URL=http://localhost:8080
+```
+
+👉 This is used for **local development**
+
+For production (already configured in deployment):
+
+```env
+REACT_APP_API_URL=https://dsa-visualizer-78t7.onrender.com
+```
+
+---
+
+##  Docker (Optional)
+
+To run the backend using Docker:
 
 ```bash
 cd backend
@@ -134,29 +156,33 @@ docker run -p 8080:8080 dsa-visualizer-backend
 
 ## 🌐 Deployment
 
-| Layer | Platform | Notes |
-|-------|----------|-------|
-| Frontend | [Vercel](https://vercel.com/) | Auto-deploys from `main` branch |
-| Backend | [Render](https://render.com/) | Deployed via Docker |
+| Layer    | Platform | Notes                            |
+| -------- | -------- | -------------------------------- |
+| Frontend | Vercel   | Auto-deployed from `main` branch |
+| Backend  | Render   | Deployed using Docker            |
 
-### Environment Variables
+⚠️ Backend may take 30–60 seconds to respond initially due to free tier cold starts.
+---
 
-**Frontend (Vercel)**
+## 🔗 Environment Variables
+
+### Frontend (Vercel)
+
+```env id="t1m7hl"
+REACT_APP_API_URL=https://dsa-visualizer-78t7.onrender.com
 ```
-REACT_APP_API_URL=https://your-render-backend-url.onrender.com
-```
-
-**Backend (Railway)**
-```
-PORT=8080
-ALLOWED_ORIGINS=https://dsa-visualizer-omega-five.vercel.app
-```
-
-### CORS Configuration
-
-The Spring Boot backend is configured to allow requests from the Vercel frontend domain. Update `CorsConfig.java` if your frontend URL changes.
 
 ---
+
+## 🔐 CORS Configuration
+
+The backend allows requests from the deployed frontend domain.
+
+If you change the frontend URL, update the CORS configuration in:
+
+```text id="m4l3qv"
+CorsConfig.java
+```
 
 ## 🧱 Tech Stack
 
@@ -180,33 +206,31 @@ The Spring Boot backend is configured to allow requests from the Vercel frontend
 
 ## 🐛 Known Challenges & Solutions
 
-<details>
-<summary><strong>CORS errors in production</strong></summary>
+### ▾ CORS errors in production
 
-Cross-origin requests were blocked when the React app (Vercel) tried to call the Spring Boot API (Railway). Fixed by explicitly whitelisting the Vercel origin in `@CrossOrigin` and the global CORS config in Spring Boot.
+Cross-origin requests were blocked when the frontend (Vercel) attempted to call the backend API.
+**Solution:** Configured CORS in Spring Boot using `@CrossOrigin` to allow requests from the frontend domain.
 
-</details>
+---
 
-<details>
-<summary><strong>Environment variable injection on Render</strong></summary>
+### ▾ Deployment issues on Render
 
-Environment variables set locally in `.env` weren't being picked up in the Render Docker build context. Resolved by injecting them directly via Render's dashboard environment settings instead of relying on the Dockerfile `ENV` instruction.
+The backend failed to deploy due to incorrect Docker configuration and root directory settings.
+**Solution:** Fixed the Docker setup and set the correct root directory (`backend`) in Render.
 
-</details>
+---
 
-<details>
-<summary><strong>Docker build failures</strong></summary>
+### ▾ Maven wrapper issues on Windows
 
-Build failures during Railway deployment were caused by the Maven wrapper (`mvnw`) not having execute permissions in the Docker image. Fixed with `RUN chmod +x mvnw` in the Dockerfile.
+The Maven wrapper (`mvnw`) caused permission errors during local and Docker builds.
+**Solution:** Switched to system-installed Maven (`mvn`) for consistent builds.
 
-</details>
+---
 
-<details>
-<summary><strong>Frontend not reflecting backend changes</strong></summary>
+### ▾ Frontend–backend integration issues
 
-API integration issues were debugged by testing backend endpoints independently with Postman/curl before connecting to the frontend — isolating whether bugs were in the API response shape or the frontend parsing logic.
-
-</details>
+The frontend was not reflecting backend changes due to incorrect API endpoints.
+**Solution:** Verified backend APIs using Postman and updated frontend API URLs accordingly.
 
 ---
 
