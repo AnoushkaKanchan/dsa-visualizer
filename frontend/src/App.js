@@ -51,7 +51,7 @@ function App() {
     pauseRef.current = false;
 
     try {
-      const response = await fetch("https://dsa-visualizer-production.up.railway.app/api/run", {
+      const response = await fetch("https://dsa-visualizer-78t7.onrender.com/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -356,7 +356,7 @@ function App() {
             <div className="array-boxes">
               {displayArray.map((value, index) => {
                 const isMerge = currentStep && isMergeRangeStep(currentStep);
-                const { index1, index2 } = currentStep || {};
+                const { index1, index2} = currentStep || {};
 
                 // FIX: For merge range, highlight the whole range in boxes too
                 const isInMergeRange =
